@@ -60,7 +60,7 @@ Celestial.display = function(config) {
 
   prjMap = Celestial.projection(cfg.projection).rotate(rotation).translate([width/2, height/2]).scale(scale);
 
-  zoom = d3.geo.zoom().projection(prjMap).center([width/2, height/2]).scaleExtent([scale, scale*5]).on("zoom.redraw", redraw);
+  zoom = d3.geo.zoom().projection(prjMap).center([width/2, height/2]).scaleExtent([scale*0.5, scale*5]).on("zoom.redraw", redraw);
 
   var canvas = d3.selectAll("canvas");
   if (canvas[0].length === 0) canvas = d3.select(par).append("canvas");
@@ -294,12 +294,13 @@ Celestial.display = function(config) {
   }
 
   function resize(set) {
+	console.log("resize")
     width = getWidth();
     if (cfg.width === width && !set) return;
     height = width/ratio;
     scale = proj.scale * width/1024;
     canvas.attr("width", width).attr("height", height);
-    zoom.scaleExtent([scale, scale*5]).scale(scale);
+    zoom.scaleExtent([scale * 0.5, scale*5]).scale(scale);
     prjMap.translate([width/2, height/2]).scale(scale);
     if (parent) parent.style.height = px(height);
     redraw();
@@ -353,7 +354,7 @@ Celestial.display = function(config) {
       prjMap = Celestial.projection(config.projection).rotate(rot).translate([width/2, height/2]).scale(scale);
       map.projection(prjMap);
       setClip(proj.clip);
-      zoom.projection(prjMap).scaleExtent([scale, scale*5]).scale(scale);
+      zoom.projection(prjMap).scaleExtent([scale*0.5, scale*5]).scale(scale);
       cfg.adaptable = bAdapt;
       redraw();
     });
@@ -553,7 +554,7 @@ Celestial.display = function(config) {
         czo = $("celestial-zoomout");
     if (!czi || !czo) return;
     czi.disabled = sc >= scale*4.99;
-    czo.disabled = sc <= scale;
+    czo.disabled = sc <= scale*0.9;
   }
 
   function setClip(setit) {
@@ -1304,7 +1305,7 @@ var projections = {
   "eckert5": {n:"Eckert V", arg:null, scale:182},
   "eckert6": {n:"Eckert VI", arg:null, scale:182},
   "eisenlohr": {n:"Eisenlohr", arg:null, scale:102},
-  "equirectangular": {n:"Equirectangular", arg:null, scale:165},
+  "equirectangular": {n:"Equirectangular", arg:null, scale:165, ratio: 2.1},
   "fahey": {n:"Fahey", arg:null, scale:196, ratio:1.4},
   "mtFlatPolarParabolic": {n:"Flat Polar Parabolic", arg:null, scale:175},
   "mtFlatPolarQuartic": {n:"Flat Polar Quartic", arg:null, scale:230, ratio:1.65},

@@ -4,12 +4,13 @@
   <title>D3-Celestial Star Map</title>
   <script type="text/javascript" src="../lib/d3.min.js"></script>
   <script type="text/javascript" src="../lib/d3.geo.projection.min.js"></script>
-  <script type="text/javascript" src="../celestial.min.js"></script>
+  <script type="text/javascript" src="../celestial.js"></script>
   <script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
   <link rel="stylesheet" href="../celestial.css">
 </head><body>
 
-<button onclick="downloadImage()">button</button>
+<button onclick="mirrorImage()">flip</button>
+<button onclick="downloadImage()">download</button>
 
 <script type="text/javascript">
 /* D3-Celestial sky map
@@ -18,18 +19,18 @@
    or roll your own with the format template in templ.json
 */
 var config = {
-  width: 1000,     // Default width, 0 = full parent width; height is determined by projection
+  width: 3600,     // Default width, 0 = full parent width; height is determined by projection
   projection: "equirectangular",  // Map projection used: airy, aitoff, armadillo, august, azimuthalEqualArea, azimuthalEquidistant, baker, berghaus, boggs, bonne, bromley, collignon, craig, craster, cylindricalEqualArea, cylindricalStereographic, eckert1, eckert2, eckert3, eckert4, eckert5, eckert6, eisenlohr, equirectangular, fahey, foucaut, ginzburg4, ginzburg5, ginzburg6, ginzburg8, ginzburg9, gringorten, hammer, hatano, healpix, hill, homolosine, kavrayskiy7, lagrange, larrivee, laskowski, loximuthal, mercator, miller, mollweide, mtFlatPolarParabolic, mtFlatPolarQuartic, mtFlatPolarSinusoidal, naturalEarth, nellHammer, orthographic, patterson, polyconic, rectangularPolyconic, robinson, sinusoidal, stereographic, times, twoPointEquidistant, vanDerGrinten, vanDerGrinten2, vanDerGrinten3, vanDerGrinten4, wagner4, wagner6, wagner7, wiechel, winkel3
   transform: "equatorial", // Coordinate transformation: equatorial (default), ecliptic, galactic, supergalactic
   center: null,       // Initial center coordinates in equatorial transformation [hours, degrees, degrees],
                       // otherwise [degrees, degrees, degrees], 3rd parameter is orientation, null = default center
   orientationfixed: true,  // Keep orientation angle the same as center[2]
-  background: { fill: "rgba(0, 0, 0, 0)", stroke: "rgba(0, 0, 0, 0)", opacity: 0 }, // Background style
+  background: { fill: "rgba(0, 0, 0, 1)", stroke: "rgba(0, 0, 0, 1)", opacity: 0 }, // Background style
   adaptable: true,    // Sizes are increased with higher zoom-levels
   interactive: true,  // Enable zooming and rotation with mousewheel and dragging
   form: false,        // Display settings form
   location: false,    // Display location settings
-  controls: false,     // Display zoom controls
+  controls: true,     // Display zoom controls
   lang: "",           // Language for names, so far only for constellations: de: german, es: spanish
                       // Default:en or empty string for english
   container: "celestial-map",   // ID of parent element, e.g. div
@@ -46,10 +47,10 @@ var config = {
     namestyle: { fill: "#ddddbb", font: "11px Georgia, Times, 'Times Roman', serif", align: "left", baseline: "top" },
     propernamestyle: { fill: "#ddddbb", font: "11px Georgia, Times, 'Times Roman', serif", align: "right", baseline: "bottom" },
     propernamelimit: 1.5,  // Show proper names for stars brighter than propernamelimit
-    size: 7,       // Maximum size (radius) of star circle in pixels
+    size: 3,       // Maximum size (radius) of star circle in pixels
     exponent: -0.28, // Scale exponent for star size, larger = more linear
-    data: 'stars.8.json' // Data source for stellar data
-    //data: 'stars.8.json' // Alternative deeper data source for stellar data
+    //data: 'stars.6.json' // Data source for stellar data
+    data: 'stars.8.json' // Alternative deeper data source for stellar data
   },
   dsos: {
     show: true,    // Show Deep Space Objects
@@ -122,11 +123,40 @@ function buttonClick() {
 }
 
 function downloadImage() {
+	console.log("download image");
+
     var canvas = document.getElementsByTagName('canvas')[0];
 
     canvas.toBlob(function(blob) {
         saveAs(blob, "download.png");
     });
+}
+
+var canvas = document.getElementsByTagName('canvas')[0];
+var ctx=canvas.getContext("2d");
+var cw=canvas.width;
+var ch=canvas.height;
+var img=new Image();
+
+function mirrorImage() {
+	console.log("mirror image");
+	img.onload=flipImageHorizontally;
+	img.src = document.getElementsByTagName('canvas')[0].toDataURL('image/png');
+}
+
+function flipImageHorizontally() {
+	// move to img's width
+    ctx.translate(img.width, 0);
+
+    // scaleX by -1; this "trick" flips horizontally
+    ctx.scale(-1,1);
+    
+    // draw the img
+    // no need for x,y since we've already translated
+    ctx.drawImage(img,0,0);
+    
+    // always clean up -- reset transformations to default
+    ctx.setTransform(1,0,0,1,0,0);
 }
 
 </script>
